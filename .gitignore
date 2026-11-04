@@ -1,0 +1,10 @@
+node_modules
+dist
+.vercel
+.env
+.env.*
+# local database, sessions and the one-time admin password — never commit
+server/data
+# local editor / assistant settings
+.claude
+*.tsbuildinfo

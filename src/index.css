@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ---------------- App UI helpers ---------------- */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 shadow-sm;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-md w-8 h-8 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors disabled:opacity-30 disabled:pointer-events-none;
+  }
+  .input {
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm transition focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
+  }
+  .label {
+    @apply block text-xs font-medium text-slate-600 mb-1.5;
+  }
+  .card {
+    @apply rounded-xl border border-slate-200/80 bg-white shadow-card;
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ================================================================
+   CV page — shared by preview, thumbnails and print
+   ================================================================ */
+.cv-page {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: normal;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+.cv-page *,
+.cv-page *::before,
+.cv-page *::after {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.preview-host .cv-page {
+  min-height: var(--min-h, 297mm);
+}
+/* Full-page background layer (sidebars, edge strips). In print it becomes fixed so it repeats on every page. */
+.cv-page-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.cv-page-content {
+  position: relative;
+  z-index: 1;
+}
+/* Vertical padding of flowing columns is repeated at the top/bottom of every printed page. */
+.cv-flow {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.cv-page a {
+  color: inherit;
+  text-decoration: none;
+}
+.cv-page h1,
+.cv-page h2,
+.cv-page h3 {
+  overflow-wrap: anywhere;
+}
+
+/* Bullets: native markers only (pseudo-element bullets break PDF text order). */
+.cv-page ul.cv-bullets {
+  padding-left: 1.2em;
+}
+.cv-page ul.cv-bullets > li {
+  margin-top: 0.12em;
+  padding-left: 0.15em;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-bullets-disc {
+  list-style-type: disc;
+}
+.cv-bullets-circle {
+  list-style-type: circle;
+}
+.cv-bullets-square {
+  list-style-type: square;
+}
+.cv-bullets-dash {
+  list-style-type: '–';
+}
+.cv-bullets-dash > li {
+  padding-left: 0.45em !important;
+}
+.cv-bullets-accent {
+  list-style-type: disc;
+}
+.cv-bullets-accent > li::marker {
+  color: var(--accent);
+}
+
+/* Pagination rules */
+/* NB: break-after:avoid propagates from a last child to its parents, so it is applied only
+   where something follows inside the same entry (header → its bullets), never to whole blocks. */
+.cv-keep,
+.cv-avoid {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-keep-soft {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-keep-next,
+.cv-heading {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+.cv-line {
+  orphans: 2;
+  widows: 2;
+}
+
+/* ================================================================
+   Print / PDF
+   ================================================================ */
+#print-root {
+  display: none;
+}
+
+/* Zero page margin: browsers then have no room to print their own URL/date headers & footers.
+   Per-page whitespace comes from each template's cloned column padding (.cv-flow). */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    min-height: 0 !important;
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Only the CV prints: no app chrome, overlays, toasts, dialogs or injected widgets. */
+  body > *:not(#root),
+  body > #root > *:not(#print-root) {
+    display: none !important;
+  }
+  #print-root {
+    display: block !important;
+  }
+  #print-root .cv-page {
+    min-height: 0;
+    width: 210mm;
+    box-shadow: none !important;
+  }
+  #print-root .cv-page-bg {
+    position: fixed;
+    inset: 0;
+    width: 210mm;
+    height: 297mm;
+  }
+}
+
+/* Standalone render route (#/render/...) used for automated PDF checks */
+.render-route #print-root {
+  display: block;
+}
